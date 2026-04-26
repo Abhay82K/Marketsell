@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Krishi Market</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar glass">
+      <div>
+        <h1>🌾 Krishi Market</h1>
+        <p>Direct farmer-to-government procurement with live mandi insights.</p>
+      </div>
+      <span class="pill">Smart Agri Commerce</span>
+    </header>
+
+    <main class="grid-layout">
+      <section class="card sell-card" id="sell">
+        <h2>Sell Product</h2>
+        <p class="subtitle">Submit your produce for direct government purchase.</p>
+
+        <form id="sellForm" enctype="multipart/form-data">
+          <div class="form-grid">
+            <label>
+              Farmer Name
+              <input type="text" name="farmerName" placeholder="Enter full name" required />
+            </label>
+
+            <label>
+              Product
+              <select name="product" required>
+                <option value="">Select crop</option>
+                <option>Wheat</option>
+                <option>Rice</option>
+                <option>Maize</option>
+                <option>Tomato</option>
+                <option>Onion</option>
+                <option>Vegetables</option>
+                <option>Pulses</option>
+              </select>
+            </label>
+
+            <label>
+              Quantity (Quintal)
+              <input type="number" min="1" name="quantity" placeholder="e.g. 15" required />
+            </label>
+
+            <label>
+              Expected Price (₹ / Quintal)
+              <input type="number" min="1" name="expectedPrice" placeholder="e.g. 2400" required />
+            </label>
+
+            <label class="full-width">
+              Product Image
+              <input type="file" name="productImage" accept="image/*" required />
+            </label>
+          </div>
+
+          <button class="btn primary" type="submit" id="submitBtn">Submit Product</button>
+          <p class="helper-text">Images help procurement teams inspect quality faster.</p>
+        </form>
+      </section>
+
+      <section class="card" id="prices">
+        <div class="section-head">
+          <h2>Live Market Prices</h2>
+          <button class="btn ghost" id="refreshPricesBtn">Refresh</button>
+        </div>
+        <p class="subtitle">Prices update every 5 seconds from a simulated live feed.</p>
+        <div id="priceCards" class="price-grid"></div>
+      </section>
+
+      <section class="card" id="listings">
+        <div class="section-head">
+          <h2>Government Dashboard (Admin)</h2>
+          <button class="btn ghost" id="refreshListingsBtn">Reload Listings</button>
+        </div>
+        <p class="subtitle">Approve or reject incoming farmer submissions.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Farmer</th>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Expected Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="listingTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div id="notification" class="notification hidden"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
