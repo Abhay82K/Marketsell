@@ -1,16 +1,15 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const path = require('path');
 const dotenv = require('dotenv');
 
 const productRoutes = require('./routes/productRoutes');
 const priceRoutes = require('./routes/priceRoutes');
+const weatherRoutes = require('./routes/weatherRoutes');
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/krishi_market';
+const PORT = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,20 +22,12 @@ app.get('/health', (_req, res) => {
 
 app.use('/api/products', productRoutes);
 app.use('/api/prices', priceRoutes);
+app.use('/api/weather', weatherRoutes);
 
 app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log('MongoDB connected successfully.');
-    app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error('MongoDB connection error:', error.message);
-    process.exit(1);
-  });
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});

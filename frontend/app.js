@@ -19,8 +19,8 @@ const showNotification = (message, type = 'success') => {
   }, 3000);
 };
 
-const formatDateTime = (isoDate) =>
-  new Date(isoDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+const formatTime = () =>
+  new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
 const setLoading = (button, isLoading, text = 'Loading...') => {
   if (!button) return;
@@ -35,7 +35,7 @@ const setLoading = (button, isLoading, text = 'Loading...') => {
 
 const renderListings = (products) => {
   if (!products.length) {
-    listingTableBody.innerHTML = `<tr><td colspan="6">No listings yet. Submit a product to get started.</td></tr>`;
+    listingTableBody.innerHTML = `<tr><td colspan="7">No listings yet. Submit a product to get started.</td></tr>`;
     return;
   }
 
@@ -44,7 +44,8 @@ const renderListings = (products) => {
       (item) => `
       <tr>
         <td>${item.farmerName}</td>
-        <td>${item.product}</td>
+        <td>${item.seedType}</td>
+        <td>${item.variety}</td>
         <td>${item.quantity} qt</td>
         <td>₹${item.expectedPrice}</td>
         <td><span class="status ${item.status.toLowerCase()}">${item.status}</span></td>
@@ -73,20 +74,27 @@ const fetchListings = async () => {
   }
 };
 
-const renderPrices = (payload) => {
-  const { data, lastUpdated } = payload;
+const renderPrices = ({ prices }) => {
+  if (!Array.isArray(prices) || !prices.length) {
+    priceCards.innerHTML = '<p>Live prices unavailable. Please check backend.</p>';
+    return;
+  }
 
-  priceCards.innerHTML = data
+  const updatedAt = formatTime();
+
+  priceCards.innerHTML = prices
     .map((entry) => {
-      const trendArrow = entry.trend === 'up' ? '▲' : '▼';
-      const trendClass = entry.trend === 'up' ? 'trend-up' : 'trend-down';
+      const trendUp = Math.random() > 0.5;
+      const trendArrow = trendUp ? '▲' : '▼';
+      const trendClass = trendUp ? 'trend-up' : 'trend-down';
 
       return `
       <article class="price-card">
-        <strong>${entry.crop}</strong>
-        <p class="price">₹${entry.price}/qt</p>
-        <p class="${trendClass}">${trendArrow} ${entry.trend.toUpperCase()}</p>
-        <p class="updated-at">Updated: ${formatDateTime(lastUpdated)}</p>
+        <strong>${entry.seed}</strong>
+        <p class="price">₹${entry.price}</p>
+        <p>₹/quintal</p>
+        <p class="${trendClass}">${trendArrow} ${trendUp ? 'UP' : 'DOWN'}</p>
+        <p class="updated-at">Updated: ${updatedAt}</p>
       </article>
     `;
     })
@@ -99,10 +107,14 @@ const fetchPrices = async () => {
     const response = await fetch(api.prices);
     const result = await response.json();
 
-    if (!response.ok) throw new Error(result.message || 'Failed to fetch prices.');
+    if (!response.ok || !result.success) {
+      throw new Error('Live prices unavailable. Please check backend.');
+    }
+
     renderPrices(result);
-  } catch (error) {
-    showNotification(error.message, 'error');
+  } catch (_error) {
+    priceCards.innerHTML = '<p>Live prices unavailable. Please check backend.</p>';
+    showNotification('Live prices unavailable. Please check backend.', 'error');
   } finally {
     setLoading(refreshPricesBtn, false);
   }

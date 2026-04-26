@@ -8,10 +8,15 @@ const productSchema = new mongoose.Schema(
       trim: true,
       minlength: 2,
     },
-    product: {
+    seedType: {
       type: String,
-      required: [true, 'Product is required'],
-      enum: ['Wheat', 'Rice', 'Maize', 'Tomato', 'Onion', 'Vegetables', 'Pulses'],
+      required: [true, 'Seed type is required'],
+      enum: ['Wheat Seed', 'Rice Seed', 'Tomato Seed', 'Onion Seed'],
+    },
+    variety: {
+      type: String,
+      required: [true, 'Variety is required'],
+      enum: ['Hybrid', 'Organic', 'Local'],
     },
     quantity: {
       type: Number,
