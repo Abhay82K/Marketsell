@@ -4,6 +4,7 @@ const validateProduct = ({ farmerName, product, quantity, expectedPrice }) => {
   if (!farmerName || typeof farmerName !== 'string' || farmerName.trim().length < 2) {
     return 'Valid farmerName is required.';
   }
+
   if (!product || typeof product !== 'string' || product.trim().length < 2) {
     return 'Valid product is required.';
   }
@@ -11,8 +12,13 @@ const validateProduct = ({ farmerName, product, quantity, expectedPrice }) => {
   const qty = Number(quantity);
   const price = Number(expectedPrice);
 
-  if (!Number.isFinite(qty) || qty <= 0) return 'quantity must be a positive number.';
-  if (!Number.isFinite(price) || price <= 0) return 'expectedPrice must be a positive number.';
+  if (!Number.isFinite(qty) || qty <= 0) {
+    return 'quantity must be a positive number.';
+  }
+
+  if (!Number.isFinite(price) || price <= 0) {
+    return 'expectedPrice must be a positive number.';
+  }
 
   return null;
 };
@@ -20,14 +26,23 @@ const validateProduct = ({ farmerName, product, quantity, expectedPrice }) => {
 const addProduct = async (req, res) => {
   try {
     const { farmerName, product, quantity, expectedPrice } = req.body;
-    const validationError = validateProduct({ farmerName, product, quantity, expectedPrice });
+
+    const validationError = validateProduct({
+      farmerName,
+      product,
+      quantity,
+      expectedPrice,
+    });
 
     if (validationError) {
-      return res.status(400).json({ success: false, message: validationError });
+      return res.status(400).json({
+        success: false,
+        message: validationError,
+      });
     }
 
     const entry = {
-      id: `${Date.now()}-${Math.round(Math.random() * 1e6)}`,
+      id: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`,
       farmerName: farmerName.trim(),
       product: product.trim(),
       quantity: Number(quantity),
@@ -54,8 +69,15 @@ const addProduct = async (req, res) => {
 
 const getProducts = async (_req, res) => {
   try {
-    const sorted = [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    return res.status(200).json({ success: true, data: sorted });
+    const sortedProducts = [...products].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    return res.status(200).json({
+      success: true,
+      count: sortedProducts.length,
+      data: sortedProducts,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,

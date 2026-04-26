@@ -14,17 +14,24 @@ const api = {
 const showNotification = (message, type = 'success') => {
   notification.textContent = message;
   notification.className = `notification ${type}`;
+
   setTimeout(() => {
     notification.className = 'notification hidden';
   }, 3000);
 };
 
 const formatTime = () =>
-  new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  new Date().toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 
 const setLoading = (button, isLoading, text = 'Loading...') => {
   if (!button) return;
+
   button.disabled = isLoading;
+
   if (isLoading) {
     button.dataset.originalText = button.textContent;
     button.textContent = text;
@@ -35,7 +42,8 @@ const setLoading = (button, isLoading, text = 'Loading...') => {
 
 const renderListings = (products) => {
   if (!products.length) {
-    listingTableBody.innerHTML = `<tr><td colspan="7">No listings yet. Submit a product to get started.</td></tr>`;
+    listingTableBody.innerHTML =
+      `<tr><td colspan="6">No listings yet. Submit a product to get started.</td></tr>`;
     return;
   }
 
@@ -44,15 +52,11 @@ const renderListings = (products) => {
       (item) => `
       <tr>
         <td>${item.farmerName}</td>
-        <td>${item.seedType}</td>
-        <td>${item.variety}</td>
+        <td>${item.product}</td>
         <td>${item.quantity} qt</td>
         <td>₹${item.expectedPrice}</td>
-        <td><span class="status ${item.status.toLowerCase()}">${item.status}</span></td>
-        <td>
-          <button class="btn ghost action-btn" data-id="${item._id}" data-status="Approved">Approve</button>
-          <button class="btn ghost action-btn" data-id="${item._id}" data-status="Rejected">Reject</button>
-        </td>
+        <td><span class="status pending">${item.status || 'Pending'}</span></td>
+        <td>${new Date(item.createdAt).toLocaleString()}</td>
       </tr>
     `
     )
@@ -62,10 +66,14 @@ const renderListings = (products) => {
 const fetchListings = async () => {
   try {
     setLoading(refreshListingsBtn, true);
+
     const response = await fetch(api.products);
     const result = await response.json();
 
-    if (!response.ok) throw new Error(result.message || 'Failed to fetch listings.');
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to fetch listings.');
+    }
+
     renderListings(result.data || []);
   } catch (error) {
     showNotification(error.message, 'error');
@@ -76,45 +84,41 @@ const fetchListings = async () => {
 
 const renderPrices = ({ prices }) => {
   if (!Array.isArray(prices) || !prices.length) {
-    priceCards.innerHTML = '<p>Live prices unavailable. Please check backend.</p>';
+    priceCards.innerHTML = '<p>Market prices unavailable. Please check backend.</p>';
     return;
   }
 
   const updatedAt = formatTime();
 
   priceCards.innerHTML = prices
-    .map((entry) => {
-      const trendUp = Math.random() > 0.5;
-      const trendArrow = trendUp ? '▲' : '▼';
-      const trendClass = trendUp ? 'trend-up' : 'trend-down';
-
-      return `
+    .map(
+      (entry) => `
       <article class="price-card">
         <strong>${entry.seed}</strong>
         <p class="price">₹${entry.price}</p>
         <p>₹/quintal</p>
-        <p class="${trendClass}">${trendArrow} ${trendUp ? 'UP' : 'DOWN'}</p>
         <p class="updated-at">Updated: ${updatedAt}</p>
       </article>
-    `;
-    })
+    `
+    )
     .join('');
 };
 
 const fetchPrices = async () => {
   try {
     setLoading(refreshPricesBtn, true);
+
     const response = await fetch(api.prices);
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error('Live prices unavailable. Please check backend.');
+      throw new Error(result.message || 'Market prices unavailable.');
     }
 
     renderPrices(result);
-  } catch (_error) {
-    priceCards.innerHTML = '<p>Live prices unavailable. Please check backend.</p>';
-    showNotification('Live prices unavailable. Please check backend.', 'error');
+  } catch (error) {
+    priceCards.innerHTML = '<p>Market prices unavailable. Please check backend.</p>';
+    showNotification(error.message, 'error');
   } finally {
     setLoading(refreshPricesBtn, false);
   }
@@ -125,15 +129,29 @@ sellForm.addEventListener('submit', async (event) => {
 
   try {
     setLoading(submitBtn, true, 'Submitting...');
+
     const formData = new FormData(sellForm);
+
+    const payload = {
+      farmerName: formData.get('farmerName'),
+      product: formData.get('product') || formData.get('seedType'),
+      quantity: formData.get('quantity'),
+      expectedPrice: formData.get('expectedPrice'),
+    };
 
     const response = await fetch(api.products, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
 
     const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Submission failed.');
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Submission failed.');
+    }
 
     showNotification('Product submitted successfully!');
     sellForm.reset();
@@ -142,30 +160,6 @@ sellForm.addEventListener('submit', async (event) => {
     showNotification(error.message, 'error');
   } finally {
     setLoading(submitBtn, false);
-  }
-});
-
-listingTableBody.addEventListener('click', async (event) => {
-  const actionBtn = event.target.closest('.action-btn');
-  if (!actionBtn) return;
-
-  const { id, status } = actionBtn.dataset;
-
-  try {
-    setLoading(actionBtn, true, 'Updating...');
-    const response = await fetch(`${api.products}/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    });
-
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || 'Status update failed.');
-
-    showNotification(`Listing ${status.toLowerCase()} successfully.`);
-    await fetchListings();
-  } catch (error) {
-    showNotification(error.message, 'error');
   }
 });
 

@@ -28,6 +28,8 @@ const getPrices = async (_req, res) => {
 
     return res.status(200).json({
       success: true,
+      source: 'Dynamic demo market price data',
+      isLive: false,
       prices: nextPrices,
     });
   } catch (error) {

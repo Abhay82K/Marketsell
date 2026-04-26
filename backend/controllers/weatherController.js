@@ -11,6 +11,7 @@ const parseCoord = (value, fallback) => {
 const getWeather = async (req, res) => {
   try {
     const apiKey = process.env.OPENWEATHER_API_KEY;
+
     if (!apiKey) {
       return res.status(500).json({
         success: false,
@@ -34,6 +35,7 @@ const getWeather = async (req, res) => {
     }
 
     return res.status(200).json({
+      success: true,
       source: 'OpenWeather Live API',
       isLive: true,
       location: `${payload.name || 'Unknown'}, ${payload.sys?.country || ''}`.trim(),

@@ -10,7 +10,7 @@
     <header class="topbar glass">
       <div>
         <h1>🌾 Krishi Market</h1>
-        <p>Direct farmer-to-government procurement with live mandi insights.</p>
+        <p>Direct farmer-to-government procurement with market insights.</p>
       </div>
       <span class="pill">Smart Agri Commerce</span>
     </header>
@@ -18,9 +18,9 @@
     <main class="grid-layout">
       <section class="card sell-card" id="sell">
         <h2>Sell Product</h2>
-        <p class="subtitle">Submit your produce for direct government purchase.</p>
+        <p class="subtitle">Submit your produce with your expected price.</p>
 
-        <form id="sellForm" enctype="multipart/form-data">
+        <form id="sellForm">
           <div class="form-grid">
             <label>
               Farmer Name
@@ -28,23 +28,13 @@
             </label>
 
             <label>
-              Seed Type
-              <select name="seedType" required>
-                <option value="">Select seed</option>
+              Product
+              <select name="product" required>
+                <option value="">Select product</option>
                 <option>Wheat Seed</option>
                 <option>Rice Seed</option>
                 <option>Tomato Seed</option>
                 <option>Onion Seed</option>
-              </select>
-            </label>
-
-            <label>
-              Variety
-              <select name="variety" required>
-                <option value="">Select variety</option>
-                <option>Hybrid</option>
-                <option>Organic</option>
-                <option>Local</option>
               </select>
             </label>
 
@@ -57,44 +47,38 @@
               Expected Price (₹ / Quintal)
               <input type="number" min="1" name="expectedPrice" placeholder="e.g. 2400" required />
             </label>
-
-            <label class="full-width">
-              Product Image
-              <input type="file" name="productImage" accept="image/*" required />
-            </label>
           </div>
 
           <button class="btn primary" type="submit" id="submitBtn">Submit Product</button>
-          <p class="helper-text">Images help procurement teams inspect quality faster.</p>
+          <p class="helper-text">Your product will be added to the government dashboard.</p>
         </form>
       </section>
 
       <section class="card" id="prices">
         <div class="section-head">
-          <h2>Live Market Prices</h2>
+          <h2>Market Prices</h2>
           <button class="btn ghost" id="refreshPricesBtn">Refresh</button>
         </div>
-        <p class="subtitle">Prices update every 5 seconds from a simulated live feed.</p>
+        <p class="subtitle">Prices update every 5 seconds from backend feed.</p>
         <div id="priceCards" class="price-grid"></div>
       </section>
 
       <section class="card" id="listings">
         <div class="section-head">
-          <h2>Government Dashboard (Admin)</h2>
+          <h2>Government Dashboard</h2>
           <button class="btn ghost" id="refreshListingsBtn">Reload Listings</button>
         </div>
-        <p class="subtitle">Approve or reject incoming farmer submissions.</p>
+        <p class="subtitle">View incoming farmer submissions.</p>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Farmer</th>
-                <th>Seed</th>
-                <th>Variety</th>
+                <th>Product</th>
                 <th>Qty</th>
                 <th>Expected Price</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th>Created At</th>
               </tr>
             </thead>
             <tbody id="listingTableBody"></tbody>
