@@ -2,24 +2,23 @@ const Product = require('../models/Product');
 
 const addProduct = async (req, res) => {
   try {
-    const { farmerName, seedType, variety, quantity, expectedPrice } = req.body;
+    const { farmerName, product, quantity, expectedPrice } = req.body;
 
     const productEntry = await Product.create({
       farmerName,
-      seedType,
-      variety,
+      product,
       quantity,
       expectedPrice,
       imageUrl: req.file ? `/uploads/${req.file.filename}` : '',
     });
 
     return res.status(201).json({
-      message: 'Seed listing submitted successfully.',
+      message: 'Product submitted successfully.',
       data: productEntry,
     });
   } catch (error) {
     return res.status(400).json({
-      message: 'Unable to submit seed listing.',
+      message: 'Unable to submit product.',
       error: error.message,
     });
   }
